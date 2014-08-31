@@ -1,9 +1,18 @@
-sims
-====
+sims R-package
+==============
 
 An R package for Computing Semantic Similarities
 
-Contributors
-============
- - Jose Luis Mosquera - PhD candidate. Universtiy of Barcelona
- - Alex Sánchez, PhD - Supervisor. University of Barcelona
+# Installation #
+---
+
+Using the 'devtools' package:
+
+    > install.packages("devtools")
+    > library(devtools)
+    > install_github('sims')
+
+Authors
+-------
+ - Jose Luis Mosquera (PhD candidate) Universtiy of Barcelona
+ - Alex Sánchez, PhD (Supervisor). University of Barcelona
