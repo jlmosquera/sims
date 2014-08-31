@@ -24,17 +24,17 @@ The package can manage any ontology, but it is particularly focused on the Gene 
 In R console:
 
 - Install 'devtools' package:
-
+```R
     > install.packages("devtools")
-    
+```    
 - Load the package 
-
+```R
     > library(devtools)
-
+``` 
 - Install 'sims' package:
-
+```R
     > install_github('sims')
-
+``` 
 ## NOTE
 
 `sims` is an R-package developed as a part of a Thesis.
