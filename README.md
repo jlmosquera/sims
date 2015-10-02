@@ -76,5 +76,6 @@ Suggests: org.Hs.eg.db
 
 ## 7. Authors
 
-* Author and Mantainer: Jose Luis Mosquera, PhD (jlmosquera@gmail.com) - Department of Statistics. Universtiy of Barcelona
-* Advisor: Alex Sánchez, PhD - Department of Statistics. University of Barcelona
+* Author and Mantainer: Jose Luis Mosquera, PhD (jlmosquera@gmail.com) - Department of Statistics. Universtiy of Barcelona.
+                        Currently at the Bioinformatics/Biostatistics Uniat - IRB Barcelona
+* Advisor: Alex Sánchez, PhD - Department of Statistics. University of Barcelona.
