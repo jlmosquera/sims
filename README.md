@@ -72,9 +72,9 @@ Suggests: org.Hs.eg.db
 
 ## 6. NOTE
 
-`sims` is an R-package developed as a part of the PhD thesis called *_Methods and Models for the Analysis of Biological Significance Based on High-Throughput Data_* at the [University of Barcelona](http://www.ub.edu/web/ub/en/index.html?).
+`sims` is an R-package that was developed as a part of the PhD thesis called *_Methods and Models for the Analysis of Biological Significance Based on High-Throughput Data_* at the [University of Barcelona](http://www.ub.edu/web/ub/en/index.html?).
 
 ## 7. Authors
 
-* Author and Mantainer: Jose Luis Mosquera, PhD (jlmosquera@gmail.com), PhD - Department of Statistics. Universtiy of Barcelona
+* Author and Mantainer: Jose Luis Mosquera, PhD (jlmosquera@gmail.com) - Department of Statistics. Universtiy of Barcelona
 * Advisor: Alex Sánchez, PhD - Department of Statistics. University of Barcelona
