@@ -61,21 +61,26 @@ In R console:
 
 There are two manuals for this version of the package:
 
-| sims-vignette.pdf | sins Vignette    |
-| sims-manual.pdf   | Reference Manual |
+`sims-vignette.pdf` : Vignette
+
+`sims-manual.pdf` : Reference Manual
 
 ## 5. Prerequisites / Dependencies
 
-Depends : AnnotationDbi, expm, GOstats, plyr
-Imports : Matrix, knitr, igraph, methods, plotrix, Rgraphviz, vegan
-Suggests: org.Hs.eg.db
+__Depends__ : AnnotationDbi, expm, GOstats, plyr
+
+__Imports__ : Matrix, knitr, igraph, methods, plotrix, Rgraphviz, vegan
+
+__Suggests__: org.Hs.eg.db
 
 ## 6. NOTE
 
-`sims` is an R-package that was developed as a part of the PhD thesis called *_Methods and Models for the Analysis of Biological Significance Based on High-Throughput Data_* at the [University of Barcelona](http://www.ub.edu/web/ub/en/index.html?).
+`sims` is an R-package that was developed as a part of the PhD thesis called *__[Methods and Models for the Analysis of Biological Significance Based on High-Throughput Data](http://hdl.handle.net/10803/286465)__* at the [University of Barcelona](http://www.ub.edu/web/ub/en/index.html?).
+
+__Date of defense__: 2014.12.12
 
 ## 7. Authors
 
-* Author and Mantainer: Jose Luis Mosquera, PhD (jlmosquera@gmail.com) - Department of Statistics. Universtiy of Barcelona.
-                        Currently at the Bioinformatics/Biostatistics Uniat - IRB Barcelona
-* Advisor: Alex Sánchez, PhD - Department of Statistics. University of Barcelona.
+* __Author and Mantainer:__ Jose Luis Mosquera, PhD (jlmosquera@gmail.com) - Department of Statistics. Universtiy of Barcelona.
+                        Currently, Head of the Bioinformatics Unit at the [IDIBELL](https://idibell.cat/en/services/scientific-and-technical-services/bioinformatics/).
+* __Advisor:__ Alex Sánchez, PhD - Department of Statistics. University of Barcelona.
