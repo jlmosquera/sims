@@ -1,0 +1,14 @@
+import(Matrix)
+import(knitr)
+import(Rgraphviz)
+import(igraph)
+import(methods)
+import(plotrix)
+import(vegan)
+
+exportPattern("^[[:alpha:]]+")
+exportClasses(
+    "OOC" 
+)
+
+importMethodsFrom(AnnotationDbi, as.list)

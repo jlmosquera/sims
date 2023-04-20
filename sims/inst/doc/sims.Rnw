@@ -1,0 +1,384 @@
+% !Rnw weave = knitr
+%\VignetteEngine{knitr::knitr} 
+%\VignetteIndexEntry{sims Vignette}
+
+\documentclass{article}
+
+%%
+%% Packages
+%%
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+%%
+%% New commands
+%%
+
+%% If appears an extra line after hiding a result
+
+\makeatletter
+\newcommand\gobblepars{%
+	\@ifnextchar\par%
+	{\expandafter\gobblepars\@gobble}%
+	{}}
+\makeatother
+
+\bibliographystyle{plain}
+
+\begin{document}
+
+\title{\texttt{sims}: an \texttt{R} package for Computing Semantic Similarities}
+\author{Jose Luis Mosquera and Alex S\'anchez}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+An ontology is a way for annotating concepts of a certain domain. It allows the comparison between entities through their associated concepts, and which otherwise would not be comparable. The structure of the vocabulary of an ontology is arranged as a rooted directed acyclic graph (DAG). That is, an ontology is a hierarchy with a single ``highest'' term called the \emph{root}. All other descendant terms are connected by either one or a several directed links (i.e. the links point upwards) to the root, an these links are acyclic (i.e. cycles are not allowed in the graph).
+
+One of the most successful ontologies for annotating biological vocabularies is the Gene Ontology (GO). It is an annotation resource created and maintained by a public consortium, \href{The Gene Ontology Consortium}{http://geneontology.org/page/go-consortium-contributors-list} \cite{GO:2004}. The main goal of the consortium is \emph{citing their mission, to produce a controlled vocabulary that can be applied to all organisms even as knowledge of gene and protein roles in cells is accumulating and changing}. It is organized covering three domains: \emph{Cellular Component} (\emph{CC}), \emph{Biological Process} (\emph{BP}), and \emph{Molecular Function} (\emph{MF}). Each ontology domain consists of a high number of terms or categories hierarchically related from least (top) to most (bottom) specialized characteristics.The GO has two types of relationship (i.e. links)between GO terms: the \emph{is-a} and the \emph{part-of}. 
+
+Usually, an ontology is used for the interpretation of sets of objects mapped to this ontology. For example, the GO allows annotating genes and their products. Most genes are annotated in one or more GO terms. Annotations are made as specific as possible. As a consequence a gene is associated not only with its annotations but also with all the less specific terms associated with them. Furthermore, a given gene product may represent one or more molecular functions, be used in one or more biological processes and appear in one or more cellular components. 
+
+Many applications using ontologies require to determine the relationship between pairs of terms [11, 12]. An appropriate measure of such relationship is the semantic similarity between the terms. Generally speaking, a semantic similarity between two terms is as a function of distance between the terms in the graph
+corresponding to the underlying ontology \cite{Ganetal:2013}. There are different methods a approaches \cite{Harispeetal:2013}, but mainly they are classified into (1) methods based on node-based approaches, (2) methods based on edge-based approaches, and (3) methods based on hybrid-based approaches.
+
+\texttt{sims} package provides functions for dealing with arbitrary ontologies, computing semantic similarities between their and comparing lists of objects annotated in these ontologies, particularly focused on the GO.
+
+The present present document is just an introduction to the use of \texttt{sims} package.
+
+To start with \texttt{sims} package, write the following code
+
+<<options, echo=FALSE, eval=TRUE>>=
+options(width = 60)
+@
+<<loadPackage, eval=TRUE,  message=FALSE, warning=FALSE, results="hide">>=
+library("sims")
+help("sims")
+@
+
+Functions available in the package are
+
+<<listFunctions, eval=TRUE>>=
+ls("package:sims")
+@
+
+\section{Semantic Similarities Between Terms of an Arbitrary Ontology Mapped by a List of Objects}\label{s:ssOntologies}
+
+To illustrate the usage of basic structures and the computation of semantic similarities between terms of an arbitrary ontology with \texttt{sims} package, we are going to make use of an example proposed by Joslyn \emph{et al} \cite{Joslynetal:2004}. It consists of a 10 object identifiers mapping to terms of an ontology with 12 concepts. Figure \ref{fig:ooc} shows a representation of the example considered.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=8cm]{/home/jlm/Documentos/tesi/Tesi-JosepLluisMosquera/Capitol3-MaterialAndMethods/Capitol3.1-TwoAppraochesForExploringGOCategories/images/OOC}
+	\caption{Representation of an ontology with 12 terms and 10 object identifiers annotated in the ontology}\label{fig:ooc}
+\end{figure}
+
+In order to deal with the structure we make use of a concept called \emph{Object-Ontology Complex} (\emph{OOC}) introduced by Carey \cite{Carey:2003}, that we will see in next section \ref{ss:ooc}. But, previously we need to ``translate'' the graph structure described above in terms of matrices.
+
+For the inpatient user, load the following dataset into memory in order to compute semantic similarities and goes to subsection \ref{ss:ss}
+
+<<loadJoslynDataset, eval=FALSE>>=
+data(joslyn)
+help("joslyn")
+@
+
+Otherwise, next coding lines provides the process for building the matrix forms associated with the each component of the structure presented above
+
+<<basicObjects, eval=TRUE>>=
+
+## 1. Vocabulary of the ontology
+vocabulary <- c("R", "B", "C", "K", "F", "G", "I", "E", "J", "H", 
+"A", "D")
+
+## 2. Links between terms (structure of the ontology)
+origin <- c("B", "C", "K", "F", "G", "I", "I", "E", "J", "E", "J", 
+"A", "A", "E", "H", "D", "D", "A")
+terminus <- c("R", "R", "R", "B", "B", "B", "C", "C", "C", "K", 
+"K", "F", "G", "I", "I", "E", "J", "H")
+links <- data.frame(origin, terminus)
+mat.g <- toMat(df = links, rnames = vocabulary, 
+cnames = vocabulary)
+
+print(mat.g)
+
+## 3. Objects identifiers that are annotates in the ontology
+object.ids <- letters[1:10]
+
+## 4. Mapping from objects to terms (annotation of objects)
+object <- c("b", "d", "f", "b", "g", "h", "i", "e", "a", "b", "c", 
+"j")
+term <- c("F", "F", "I", "E", "J", "J", "J", "H", "A", "A", "A", 
+"D")
+map <- data.frame(object, term)
+mat.m <- toMat(df = map, rnames = object.ids, cnames = vocabulary)
+
+print(mat.m)
+@
+
+\subsection{Object-Ontology Complex (OOC) Container}\label{ss:ooc}
+
+An OOC is \emph{a formalism for working with ontologies for statistical purposes}. It combines the four elements described in previous section \ref{s:ssOntologies}. That is, (1) the terms of the ontology, (2) the structure of the directed acyclic graph (DAG), (3) the list of objects annotated in the ontology, and (4) how the objects map to the terms.
+
+\texttt{sims} package has a class \texttt{OOC}, that is used as a general container for Object-Ontology Complexes (OOC).
+
+<<OOCclass, eval=FALSE>>=
+help("OOC")
+@
+
+The function \texttt{toOOC} facilitates the construction of an object of class \texttt{OOC}. This object is merely used as a container of the elements of the OOC. It has four slots \texttt{T} (the list of terms or vocabulary of the ontology), \texttt{G} (the matrix accessibility matrix or the matrix of 1-step refinement associated with DAF structure of the ontology), \texttt{O} (the list of object identifiers), and \texttt{M} (the mapping matrix between objects and terms). 
+
+<<makeOOC, eval=TRUE>>=
+joslyn.OOC <- toOOC(T = vocabulary, G = mat.g, O = object.ids, 
+                    M = mat.m)
+print(joslyn.OOC)
+@
+
+\subsection{Comptutation of Semantic similarities}\label{ss:ss}
+
+In \texttt{sims} package there are implemented a total of fourteen measures from different approaches. The following subsections describe main functions to compute semantic similarities between all the pairs of terms of the induced graph (from the ontology) by a list of object identifiers.
+
+\subsubsection{Methods of Node-Based Approach}\label{ss:nb}
+
+There are implemented seven semantic similarity measures proposed by Resnik \cite{Resnik:1995}, Lin \cite{Lin:1998}, Schlicker \emph{et al.} \cite{Schlickeretal:2006}, Jiang and Conrath \cite{JiangConrath:1998}, Mazandu and Mulder \cite{MazanduMulder:2013}, Pirr\'o and Seco \cite{PirroSeco:2008}, and Pirr\'o and Euzenat \cite{PirroEuzenat:2010}. All the methods are based on the concept of \emph{Information Content} (\emph{IC}) proposed by Resnik \cite{Resnik:1995}, and the shared information between the two terms being measured is proportional to the IC of the Most Informative Common Ancestor (MICA) in the rooted DAG.
+
+Semantic similarities measures of node-based approach are computed by calling the wrapper function \texttt{sims}.
+
+<<helpsims, eval=FALSE>>=
+help("sims")
+@
+
+Three arguments are required by this function: a \texttt{list} with the ancestors of each selected term (\texttt{at}), a \texttt{numeric} vector with the IC of each term (\texttt{ic}), and the \texttt{method} required (see possibilities in the help). 
+
+To obtain the list of ancestors we need to build the accessibility matrix associated with the DAG structure by performing the following computation
+ 
+<<ancestors, eval=TRUE>>=
+## Accessibility matrix
+inv.IminusG <- inverseIminusG(joslyn.OOC)
+A.mat <- getA(inv.IminusG)
+print(A.mat)
+
+## Ancestors
+at <- ancestors(A.mat)
+print(at)
+@
+Function \texttt{resnikSummary} builds a \texttt{data.frame} providing the number of times that each term or any of its refinements appears in the OOC (i.e. $n(t_{i})$), the probability of finding the term (i.e. $p(t_{i})$), and the Information Content of the term (i.e. $IC(t_{i})$). Thus, we can calculate the IC's of each term very easily by performing 
+
+<<ICs, eval=TRUE>>=
+resnik.sum <- resnikSummary(x = joslyn.OOC)
+print(resnik.sum)
+
+ic <- resnik.sum[, "ic"]
+@
+    
+Finally, to compute the semantic similarity we just only indicate the method required 
+
+<<sims, eval=TRUE>>=
+## Computation of semantic similarity of Resnik
+## (node-based approach)
+sims.Res <- sims.nb(at, ic, method = "Res")
+head(sims.Res)
+
+## Computation of all semantic similarities of 
+## edge-based approach
+sims.all <- sims.nb(at, ic, method = "all")
+head(sims.all)    
+@
+
+The following function provides a summary of the measures
+
+<<summarySims, eval=TRUE>>=
+summarySims(sims.all)
+@
+
+\subsubsection{Methods of Edge-Based Approach}\label{ss:eb}
+
+With regard to the edge-based approach there are implemented two semantic similarity measures proposed by Resnik \cite{Resnik:1995} and Rada \emph{et al.} \cite{Radaeta:1989}. But also, it is a distance measure proposed by Rada \cite{Radaeta:1989}, and four pseudo-distances proposed by Joslyn \emph{et al} \cite{Joslynetal:2004}.
+
+Semantic similarities measures of edge-based approach are computed by calling the wrapper function \texttt{sims.eb}.
+
+<<helpsimseb, eval=FALSE>>=
+help("sims.eb")
+@
+
+This function depends on four arguments: the \texttt{OOC} object (\texttt{x}), the name of the root term of the ontology (\texttt{root}), the \texttt{list} of the ancestors of each selected term (\texttt{at}), and the \texttt{method} required (see possibilities in the help).
+
+<<sims.eb, eval=TRUE>>=
+## Computation of semantic similarity of Resnik 
+## (edge-based approach)
+Resnik.eb <- sims.eb(x = joslyn.OOC, root = "R", at, 
+                     method = "Rada")
+head(Resnik.eb)
+
+## Computation of all semantic similarities of 
+## edge-based approach
+sims.eb.all <- sims.eb(x = joslyn.OOC, root = "R", at, 
+                       method = "all")
+head(sims.eb.all)
+
+## Summary of semantic similarities
+summarySims(sims.eb.all)
+@
+
+Distance measure of Rada can be computed by calling the function \texttt{distRada}. 
+
+<<helpdistRada, eval=FALSE>>=
+help("distRada")
+@
+
+The function requires a \texttt{list} of \texttt{numeric} vectors with the lengths (in terms of depth) of the number of paths between each pair of terms (\texttt{sum.paths}), and the \texttt{list} of the ancestors of each selected term (\texttt{at}). To obtain the first argument we make use of the function \texttt{summaryPaths}
+
+<<summaryPaths, eval=TRUE>>=
+sum.paths <- summaryPaths(x = joslyn.OOC, root = "R", len = TRUE)
+head(sum.paths, 10)
+@
+
+Then, distance is calculated by
+
+<<distRada, eval=TRUE>>=
+Rada <- distRada(sum.paths, at)
+head(Rada)
+summarySims(Rada)
+@
+
+Pseudo-distances implemented in \texttt{sims} package can be computed by calling the function \texttt{pseudoDists}.
+
+<<helppseudoDists, eval=FALSE>>=
+help("pseudoDists")
+@
+
+This function needs to be fed with the \texttt{OOC} object (\texttt{x}), the name of the root term of the ontology (\texttt{root}), and the \texttt{method} required (see possibilities in the help).
+
+<<pseudoDists, eval=TRUE>>=
+## Computation of the pseudo-distance of 
+## the minimum chain length
+pd.hm <- pseudoDists(x = joslyn.OOC, root = "R", method = "hm")
+head(pd.hm)
+
+## Computation of all pseudo-distance
+pd.all <- pseudoDists(x = joslyn.OOC, root = "R", method = "all")
+head(pd.all)
+
+## Summary of pseudo-distances
+summarySims(pd.all)
+@
+ 
+\section{Semantic Similarities Associated with the GO}\label{s:ssGO}
+
+The package can manage any ontology, but it is especially focused on the Gene Ontology. In this regard, there are some functions that are particularly adapted for allow building the refinements matrix (i.e. the accessibility matrix) and the mapping matrix (i.e the matrix that maps from Entrez Gene IDs to GO IDs), performing comparisons between lists of semantic similarities, and yield different types of plots (e.g. histograms, diagram bars and DAG's of the induced graphs). Moreover, \texttt{sims} package can manage Entrez Gene IDs and GO IDs from any \texttt{R} organism package.
+
+In order to explore and compare semantic similarities the package takes advantage of two experimental datasets from two prostate cancer experiments \cite{Welshetal:2001} and \cite{Singhetal:2002}, provided by the \texttt{R} package \texttt{goProfiles} \cite{Sanchezetal:2010}. Thus, first of all, a dataset with several lists of genes, from two different studies, selected as being differentially expressed in prostate cancer is loaded into memory
+
+<<loadpratateIds, eval=TRUE>>=
+data(prostateIds)
+help("prostateIds")
+@
+
+Then, two subsets of Entrez Gene ID's are selected from two different lists of genes respectively.
+
+<<susbsetOfGenes, eval=TRUE>>=
+## Entrez Gene ID's from Welsh et al. study
+eg.we <- welsh01EntrezIDs[1:10]   
+
+## Entrez Gene ID's from Singh et al. study
+eg.sg <- singh01EntrezIDs[1:10]   
+@
+
+And finally, provide the name of human \texttt{R} organism package
+
+<<organismPackage, eval=TRUE>>=
+pckg <- "org.Hs.eg.db" 
+@
+
+\subsection{Semantic similarities between GO IDs ancestors of terms that have been mapped by Entrez Genes}\label{ss:gosims}
+
+Function \texttt{gosims} allows to compute semantic similarities between all the pairs of GO ID ancestors of terms that annotate the selected Entre Gene ID's.
+
+<<helpgosims, eval=FALSE>>=
+help("gosims")
+@
+
+The function requires the list of genes (\texttt{eg}), the ontology domain (\texttt{ontology}), the name of the organism package (\texttt{pckg}), the type of approach (\texttt{type}), and the measure used (\texttt{method}). In this example are considered all the measures from node-based approach to compute semantic similarities between GO ID's of Molecular Function (\texttt{MF}) associated with the subset of genes selected from the Welsh \emph{et al.} study
+
+<<gosims, eval=TRUE>>=
+## All semantic similarities of node-based approach
+all.nb <- gosims(eg = eg.we, ontology = "MF", pckg = pckg, 
+                 type = "nb", method = "all")
+summarySims(all.nb)                 
+@
+
+\subsection{Semantic similarities profiles}\label{ss:profiles}
+
+The following functions are though for performing comparisons between two semantic similarity profiles generated according two list of genes.
+
+The reason for comparin two lists of semantic similarities may be to understand functional gene similarities. In order to perform this type of comparison, existing packages (e.gs \texttt{GOSim}  \cite{Frohlichetal:2007} and \texttt{GOSemSim} \cite{Yuetal:2010}) propose different approaches based on similarities that yield judgments of orientation, but not magnitudes. \texttt{sims} package considers alternative strategies that rely on a more statistical approach. Some functions allow building summaries with magnitude measures and plots for highlighting differences between profiles. The following subsections illustrate the main ideas with an example that considers the two lists of genes subsetted from the studies of Welsh \emph{et al.} and Singh \emph{et al.} 
+
+\subsubsection{Computation of the semantic similarity profiles}\label{sss:gosimsAvsB}
+
+To compute the semantic similarity profiles associated with each list of Entrez Gene ID's we use the function \texttt{gosimsAvsB}. It looks for the induced graph given by two lists of Entrez Gene ID's annotated in the ontology domain, and then calculates the semantic similarities between all the pairs of GO ID ancestors associated with the GO ID's that are annotating each list of genes. Figure \ref{fig:gosimsAvsB} shows the schematically the idea of this step
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=12cm]{/home/jlm/Documentos/tesi/Tesi-JosepLluisMosquera/Capitol3-MaterialAndMethods/Capitol3.1-TwoAppraochesForExploringGOCategories/images/gosimsAvsB}
+	\caption{Schema for computing the two semantic similarities profiles associated with the two lists of genes respectively.}\label{fig:gosimsAvsB}
+\end{figure}
+
+<<gosimsAvsB, eval=TRUE>>=
+## Semantic similarity profiles computed with Resnik's measure
+## from node-based approach
+WEvsSG.nb <- gosimsAvsB(eg1 = eg.we, eg2 = eg.sg, ontology = "MF",
+                        pckg = pckg, type = "nb", method = "Res")
+@
+
+\subsubsection{Comparison between the semantic similarity profiles}\label{sss:gosimsAvsB}
+
+Statistical analysis is performed with the function \texttt{summarySimsAvsB}. It yields a summary that consists of (1) an statistic descriptive for each profile of semantic similarity measures, (2) a Mantel's Test \cite{Mantel:1967} for examining the association between the distance matrices (i.e. the similarity matrices), and (3) a Cosine Similarity \cite{Tanetal:2005} for determining the similarity between the two semantic similarity profiles.
+
+<<summarySimsAvsB, eval=TRUE>>=
+summarySimsAvsB(WEvsSG.nb)
+@
+
+\subsubsection{Plots for the semantic similarity profiles}\label{sss:plots}
+
+In \texttt{sims} package there are three types of plots implemented. They support the statistical summary provided by the function \texttt{summaryAvsB}.
+
+First plot is an histogram of the semantic similarity profiles. It shows both ``curves'' in the same plot.
+
+<<plotHistSims, eval=TRUE, message=FALSE, warning=FALSE>>=
+plotHistSims(x = WEvsSG.nb, freq = TRUE, 
+             main = "Histogram of Semantic Similarities",
+             xlab = "Semantic Similarity")
+@
+
+Second image plots a vertical bar diagram, whose bars are associated with the semantic similarities between each pair of terms. Bars on the left side are the bars corresponding to the first list of genes and bars on the right side are the bars corresponding to the second list of genes.
+
+<<sosimsProfiles, eval=TRUE>>=
+gosimsProfiles(x = WEvsSG.nb, 
+               col = c("tomato", "blue"), cex = 0.4, 
+               top.labels = c("Welsh", "PAirs of GO IDs", "Singh"),
+               main = "Semantic Similarity Profiles 
+                       Between Welsh and Singh Studies",
+               xlab = "Resnik")
+@
+
+Function \texttt{plotDAG} plots the induced subgraph from the GO domain associated with one or two lists of Entrez Gene Identifiers. The subgraph shows two types of shapes for each node. Circles are GO ID's not mapped directly by the genes and rectangles are GO ID's that are mapped directly by the genes. The color of nodes indicate the type of relation with the Entrez Gene IDs. That is, when argument \texttt{eg2} is \texttt{NULL}, there are two possibilities: nodes mapped directly are shown in \texttt{red} color and their ancestors are shown in \texttt{yellow} color. But, if argument \texttt{eg2} is not \texttt{NULL}, then there are six different colors. Nodes mapped directly from the first list of Entrez Gene IDs are shown in \texttt{red} color and their ancestors are shown in \texttt{yellow} color. Nodes mapped directly from the second list of Entrez Gene IDs are shown in \texttt{lightblue} color and their ancestors are shown in \texttt{blue} color. Nodes mapped directly from both lists of Entrez Gene IDs are shown in \texttt{magenta} color and their ancestors are shown in \texttt{violet} color.
+
+<<plotGODAG, eval=TRUE>>=
+## Induced subgraph associated with the list of genes from
+## Welsh study
+plotGODAG(eg1 = eg.we, eg2 = NULL, pckg = pckg, ontology = "MF")
+
+## Induced subgraph associated with the list of genes from
+## Singh study
+plotGODAG(eg1 = eg.sg, eg2 = NULL, pckg = pckg, ontology = "MF")
+
+## Induced subgraph associated with both lists of genes
+plotGODAG(eg1 = eg.we, eg2 = eg.sg, pckg = pckg, ontology = "MF")
+@
+  
+\bibliography{/home/jlm/Documentos/tesi/Tesi-JosepLluisMosquera/Capitol8-Bibliography/tesis}
+
+\end{document}

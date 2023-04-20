@@ -1,0 +1,15 @@
+Package: sims
+Type: Package
+Title: Semantic similarity measures between terms of an arbitrary
+        ontology
+Version: 1.0
+Date: 2014-08-16
+Author: Jose Luis Mosquera and Alex Sanchez
+Maintainer: Jose Luis Mosquera <jlmosquera@gmail.comt>
+Description: This package allows the computation of semantic similarity measures, based on different approaches, between terms of an arbitrary ontology
+License: GPL-2
+Depends: AnnotationDbi, expm, GOstats, plyr
+Imports: Matrix, knitr, igraph, methods, plotrix, Rgraphviz, vegan
+Suggests: org.Hs.eg.db
+VignetteBuilder: knitr
+Packaged: 2014-09-01 00:23:53 UTC; jlm
